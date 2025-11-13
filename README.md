@@ -1,104 +1,115 @@
-
----
 # Creational Design Patterns – Pizza Shop
-### Author: Maxim Costov FAF-232
 
----
-
-## Overview
-
-**Pizza Shop** is a Java-based demonstration project designed to illustrate the practical application of three key **Creational Design Patterns** — **Singleton**, **Builder**, and **Factory Method**.  
-The system models a simple pizza creation and ordering process that demonstrates efficient and flexible object instantiation mechanisms while respecting the **SOLID principles**.
+## Author
+Maxim Costov
 
 ---
 
 ## Objectives
 
-The primary goals of this project are to:
-1. Study and understand the **Creational Design Patterns**.  
-2. Choose a domain (Pizza Shop) and define its main entities.  
-3. Apply at least three creational patterns for flexible and maintainable object instantiation.  
-4. Ensure the solution remains modular, extensible, and adheres to SOLID principles.
+* Get familiar with the **Creational Design Patterns** (Singleton, Builder, Factory Method).  
+* Choose a specific domain — **Pizza Shop**.  
+* Implement at least 3 creational patterns for the domain to create pizzas flexibly and maintainably.
 
 ---
 
-## Implemented Creational Patterns
+## Used Design Patterns
 
-### 1. **Singleton**
-**Class:** `singleton.Kitchen`  
-Ensures there is only one shared instance of the kitchen across the entire system.  
-It also provides centralized access to the `PizzaFactory`, preventing multiple factory instances.
-
-**Key benefit:** Guarantees consistent creation behavior and controlled resource access.
+* **Singleton** – `KitchenSingleton` ensures a single global kitchen instance.  
+* **Builder** – `PizzaBuilder` allows step-by-step creation of pizzas with customizable ingredients and price.  
+* **Factory Method** – `PizzaFactory` and `PizzaType` create specific pizza types without `switch` statements.
 
 ---
 
-### 2. **Factory Method**
-**Classes:** `factory.PizzaFactory`, `factory.PizzaType`  
-The `PizzaFactory` delegates the creation of specific pizza types to the `PizzaType` enum, which defines its own creation logic.  
-This avoids conditionals (no `switch` or `if`) and ensures open/closed extensibility.
+## Implementation
 
-**Key benefit:** Adding new pizza types (e.g., `Hawaiian`) requires no modification to the factory.
+The system models a pizza ordering process where pizzas can be built, baked, and printed.  
+The **Kitchen singleton** provides a centralized access to the `PizzaFactory`, which delegates pizza creation to the **PizzaType enum**.  
+The **PizzaBuilder** allows creating pizzas step-by-step with flexible ingredients and pricing.  
+The design follows **SOLID principles**, especially **Single Responsibility (SRP)**, **Open/Closed (OCP)**, and **Dependency Inversion (DIP)**.
+
+### Example Snippets
+
+**PizzaType enum (Factory Method):**
+```java
+public enum PizzaType {
+    MARGHERITA {
+        @Override
+        public Pizza create(List<String> ingredients, double price) {
+            return new Margherita(ingredients, price);
+        }
+    },
+    PEPPERONI {
+        @Override
+        public Pizza create(List<String> ingredients, double price) {
+            return new Pepperoni(ingredients, price);
+        }
+    },
+    VEGGIE {
+        @Override
+        public Pizza create(List<String> ingredients, double price) {
+            return new Veggie(ingredients, price);
+        }
+    };
+
+    public abstract Pizza create(List<String> ingredients, double price);
+}
+````
+
+**PizzaBuilder class:**
+
+```java
+public class PizzaBuilder {
+    private PizzaType type;
+    private List<String> ingredients = new ArrayList<>();
+    private double price;
+
+    public PizzaBuilder type(PizzaType type) { this.type = type; return this; }
+    public PizzaBuilder addIngredient(String ing) { ingredients.add(ing); return this; }
+    public PizzaBuilder price(double price) { this.price = price; return this; }
+
+    public Pizza build() {
+        Kitchen kitchen = Kitchen.getInstance();
+        PizzaFactory factory = kitchen.getPizzaFactory();
+        return factory.createPizza(type, ingredients, price);
+    }
+}
+```
+
+**Main class (client usage):**
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Pizza margherita = new PizzaBuilder()
+                .type(PizzaType.MARGHERITA)
+                .addIngredient("Tomato Sauce")
+                .addIngredient("Mozzarella")
+                .addIngredient("Basil")
+                .price(8.50)
+                .build();
+
+        margherita.bake();
+        System.out.println(margherita);
+    }
+}
+```
 
 ---
 
-### 3. **Builder**
-**Class:** `builder.PizzaBuilder`  
-Used to construct complex pizza objects step-by-step by adding ingredients, type, and price.  
-It separates the construction logic from the pizza representation and integrates cleanly with the `PizzaFactory`.
+## Conclusions / Screenshots / Results
 
-**Key benefit:** Provides a flexible and readable object creation process.
+The Pizza Shop project demonstrates the effective use of three **Creational Design Patterns**:
 
----
+* **Singleton** – Centralized access to the kitchen and factory.
+* **Builder** – Flexible pizza creation with varying ingredients and prices.
+* **Factory Method** – Polymorphic instantiation of pizza types using enums.
 
-### Sample Output
+The solution respects **SOLID principles**, ensures maintainability, and is easily extensible: adding new pizza types requires only creating a new class and updating the `PizzaType` enum.
+
+**Sample Output:**
 
 ```
 Baking a classic Margherita...
 Margherita pizza with [Tomato Sauce, Mozzarella, Basil] — $8.5
-Baking a spicy Pepperoni...
-Pepperoni pizza with [Tomato Sauce, Mozzarella, Pepperoni] — $9.5
-Baking a healthy Veggie pizza...
-Veggie pizza with [Tomato Sauce, Mozzarella, Olives, Peppers] — $9.0
 ```
-
----
-
-## Compilation and Execution
-
-### Prerequisites
-
-* **Java 17** or higher
-* A text editor or IDE (IntelliJ IDEA, VS Code, etc.)
-
-### Steps
-
-1. Clone the repository:
-
-2. Navigate to the project folder:
-
-   ```bash
-   cd creational-pizza-shop
-   ```
-3. Compile the source files:
-
-   ```bash
-   javac */*.java */*/*.java
-   ```
-4. Run the main class:
-
-   ```bash
-   java client.Main
-   ```
-
----
-
-## Design Summary
-
-| Pattern            | Class(es)                   | Purpose                                                   |
-| ------------------ |-----------------------------| --------------------------------------------------------- |
-| **Singleton**      | `KitchenSingleton`          | Ensures a single global access point to the pizza factory |
-| **Builder**        | `PizzaBuilder`              | Builds pizzas in a flexible, step-by-step manner          |
-| **Factory Method** | `PizzaFactory`, `PizzaType` | Creates pizza objects without explicit conditionals       |
-
-
